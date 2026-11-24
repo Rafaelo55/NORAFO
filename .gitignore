@@ -1,0 +1,28 @@
+# Unreal
+Binaries/
+Intermediate/
+Saved/
+DerivedDataCache/
+.vs/
+.vscode/
+.idea/
+*.sln
+*.slnx
+*.suo
+*.opensdf
+*.sdf
+*.VC.db
+*.VC.opendb
+Plugins/*/Binaries/
+Plugins/*/Intermediate/
+Build/
+Packaged/
+# Blender
+*.blend1
+*.blend2
+# Python
+__pycache__/
+*.pyc
+# OS
+Thumbs.db
+.DS_Store
