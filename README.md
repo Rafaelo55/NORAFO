@@ -43,7 +43,13 @@ Requisitos: Unreal Engine 5.8.4 y Visual Studio 2022 con el workload de C++ para
 & "C:\Program Files\Epic Games\UE_5.8\Engine\Build\BatchFiles\Build.bat" NoSleepPogoEditor Win64 Development "-Project=$PWD\NoSleepPogo.uproject" -WaitMutex
 ```
 
-Después abrí `NoSleepPogo.uproject` y dale a *Play*. El mapa `L_City` abre el menú. Para entrar directo a un circuito, usá la URL `L_City?Circuit=0|1|2` (o `99` para el patio gris de prueba).
+Después abrí `NoSleepPogo.uproject` y dale a *Play*.
+
+Para generar la build de PC (Shipping), corré lo siguiente. El ejecutable queda en `Packaged/Windows/NoSleepPogo.exe` (unos 570 MB, no se sube al repositorio):
+
+```powershell
+& "C:\Program Files\Epic Games\UE_5.8\Engine\Build\BatchFiles\RunUAT.bat" BuildCookRun "-project=$PWD\NoSleepPogo.uproject" -noP4 -platform=Win64 -clientconfig=Shipping -build -cook -stage -pak -iostore -archive "-archivedirectory=$PWD\Packaged" -unattended
+``` El mapa `L_City` abre el menú. Para entrar directo a un circuito, usá la URL `L_City?Circuit=0|1|2` (o `99` para el patio gris de prueba).
 
 ## Cómo se construyó (todo con scripts reproducibles)
 
@@ -83,6 +89,7 @@ Tools/run_test.sh 0 bothigh   # ... por la línea alta
 Tools/run_test.sh 0 shots     # capturas: primera persona, vistas del nivel, pausa, opciones, resultados
 Tools/run_test.sh 99 mech     # patio gris: rebote mínimo, carga breve y carga completa (3 repeticiones)
 Tools/run_test.sh menu menu   # captura del menú principal
+Tools/run_test.sh menu flow   # flujo real: desde el menú entra al circuito 1 (también se probó sobre la build Shipping)
 ```
 
 El bot tiene **30 s por intento**. Si no llega a la meta, se reinicia el nivel, con un máximo de 4 intentos. Las capturas y los logs quedan en `Saved/PogoTest`.
