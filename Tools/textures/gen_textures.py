@@ -606,6 +606,16 @@ def t_sky():
     finalize(a, "T_Sky")
 
 
+def t_water():
+    w = h = 64
+    a = canvas(w, h, (34, 70, 84))
+    a += smooth_noise(w, h, 8, 14)
+    for _ in range(26):
+        x, y = RNG.integers(0, w), RNG.integers(0, h)
+        rect(a, x, y, x + RNG.integers(3, 9), y + 1, (90, 140, 150))
+    finalize(a, "T_Water")
+
+
 def t_wire():
     t_solid("T_Wire", (26, 26, 28), 2, 8)
 
@@ -649,7 +659,7 @@ def main():
     t_sign_vertical("T_SignYellow", (230, 196, 40), (40, 30, 20))
     t_eye_mosaic()
     t_ring("T_Ring", False); t_ring("T_RingBroken", True)
-    t_sky(); t_wire()
+    t_sky(); t_wire(); t_water()
     print("TEXTURES", len(os.listdir(OUT)), OUT)
 
 
