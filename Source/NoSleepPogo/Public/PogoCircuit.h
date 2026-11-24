@@ -83,6 +83,8 @@ private:
 	void AddFoldedAwning(float X0, float X1, float WallY, bool bFacesPlusY, float Z);
 	void AddBuilding(const FVector& Min, const FVector& Max, const FString& Facade, int32 ShopFace, const FString& ShopTex,
 		const FString& Roof = TEXT("Concrete"), bool bParapet = true);
+	void QueueStreetFrontage(const FVector& Min, const FVector& Max, int32 ShopFace);
+	void AddFrontageInstances(const TCHAR* MeshName, const TArray<FTransform>& Transforms);
 	UStaticMeshComponent* AddProp(const FString& Mesh, const FVector& Loc, float Yaw, const FVector& Scale = FVector::OneVector,
 		bool bCollide = true, const FString& SlotName = TEXT(""), const FString& MatOverride = TEXT(""));
 	void AddBeam(const FVector& A, const FVector& B, float Thick, const FString& Tex);
@@ -104,6 +106,8 @@ private:
 	UPROPERTY() TObjectPtr<UStaticMeshComponent> Beacon;
 
 	int32 CircuitIndex = 0;
+	TArray<FTransform> ShopFronts;
+	TArray<FTransform> WindowFronts;
 	int32 ComponentCounter = 0;
 	float Time = 0.f;
 	bool bGoalReached = false;

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Uso: Tools/run_test.sh <circuito> <modo> [extra...]
 # Ejecuta el juego (build de editor en modo -game) con una prueba automatica y muestra el resumen.
-ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+ROOT="$(cd "$(dirname "$0")/.." && pwd -W)"
 C="$1"; M="$2"; shift 2
 URL="L_City?Circuit=$C"
 [ "$C" = "menu" ] && URL="L_City"

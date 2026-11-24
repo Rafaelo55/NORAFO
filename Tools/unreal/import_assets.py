@@ -29,7 +29,8 @@ G_MAP = "/Game/Maps"
 
 LOOPING = {"AMB_City", "MUS_Loop", "SFX_CarLoop"}
 UNLIT = {"Ring", "RingBroken", "Sky", "EyeGlow"}
-NO_COLLISION = {"SM_Awning", "SM_Ring", "SM_RingBroken", "SM_Plane", "SM_SkyDome", "SM_Lantern", "SM_SignVertical"}
+NO_COLLISION = {"SM_Awning", "SM_Ring", "SM_RingBroken", "SM_Plane", "SM_SkyDome", "SM_Lantern", "SM_SignVertical",
+                "SM_ShopBay", "SM_WindowBay"}
 
 
 def log(msg):

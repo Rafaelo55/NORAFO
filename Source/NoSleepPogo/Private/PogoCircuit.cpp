@@ -1,6 +1,7 @@
 #include "PogoCircuit.h"
 
 #include "Components/BoxComponent.h"
+#include "Components/InstancedStaticMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/CollisionProfile.h"
 #include "Engine/StaticMesh.h"
@@ -214,7 +215,56 @@ void APogoCircuit::AddBuilding(const FVector& Min, const FVector& Max, const FSt
 		default: A = FVector(Min.X - P, Min.Y, Min.Z); B = FVector(Min.X + 1.f, Max.Y, Top); break;
 		}
 		AddBox(A, B, ShopTex, 300.f, White, false);
+		if (CircuitIndex == 0 && (ShopFace == 1 || ShopFace == 2))
+		{
+			QueueStreetFrontage(Min, Max, ShopFace);
+		}
 	}
+}
+
+void APogoCircuit::QueueStreetFrontage(const FVector& Min, const FVector& Max, int32 ShopFace)
+{
+	// Las texturas de 3 m se proyectan desde el origen mundial. Una crujia
+	// completa por repeticion evita poner jambas en medio de una vidriera.
+	constexpr float Bay = 300.f;
+	const float WallY = ShopFace == 1 ? Max.Y : Min.Y;
+	const float Out = ShopFace == 1 ? 1.f : -1.f;
+	const FRotator Facing(0.f, ShopFace == 1 ? 180.f : 0.f, 0.f);
+	const float First = FMath::CeilToFloat(FMath::Max(Min.X, -1200.0) / Bay) * Bay;
+	const float End = FMath::Min(Max.X, 9000.0);
+	for (float X = First; X + Bay <= End; X += Bay)
+	{
+		const float Center = X + Bay * 0.5f;
+		ShopFronts.Emplace(Facing, FVector(Center, WallY + Out * 2.f, 0.f));
+		for (float Z = Bay; Z <= 2.f * Bay && Z + 235.f < Max.Z; Z += Bay)
+		{
+			WindowFronts.Emplace(Facing, FVector(Center, WallY, Z));
+		}
+	}
+}
+
+void APogoCircuit::AddFrontageInstances(const TCHAR* MeshName, const TArray<FTransform>& Transforms)
+{
+	if (Transforms.IsEmpty())
+	{
+		return;
+	}
+	UStaticMesh* Mesh = PogoArt::Mesh(MeshName);
+	if (!Mesh)
+	{
+		return;
+	}
+	auto* Instances = NewObject<UInstancedStaticMeshComponent>(this, FName(MeshName));
+	Instances->SetupAttachment(Root);
+	Instances->SetMobility(EComponentMobility::Static);
+	Instances->SetStaticMesh(Mesh);
+	Instances->SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
+	Instances->SetGenerateOverlapEvents(false);
+	Instances->SetCanEverAffectNavigation(false);
+	Instances->SetCullDistances(7500, 10000);
+	Instances->AddInstances(Transforms, false, false, false);
+	Instances->RegisterComponent();
+	UE_LOG(LogPogo, Verbose, TEXT("Fachada %s: %d instancias"), MeshName, Instances->GetInstanceCount());
 }
 
 UStaticMeshComponent* APogoCircuit::AddProp(const FString& Mesh, const FVector& Loc, float Yaw, const FVector& Scale, bool bCollide, const FString& SlotName, const FString& MatOverride)
@@ -437,6 +487,10 @@ void APogoCircuit::Build(int32 Index)
 
 void APogoCircuit::FinishBuild()
 {
+	AddFrontageInstances(TEXT("SM_ShopBay"), ShopFronts);
+	AddFrontageInstances(TEXT("SM_WindowBay"), WindowFronts);
+	ShopFronts.Empty();
+	WindowFronts.Empty();
 	UE_LOG(LogPogo, Log, TEXT("Circuito %d construido: %d componentes, %d puntos, %d autos, bot %d/%d objetivos"),
 		CircuitIndex, ComponentCounter, Checkpoints.Num(), Cars.Num(), BotRoute.Num(), BotRouteHigh.Num());
 }

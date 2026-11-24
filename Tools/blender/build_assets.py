@@ -274,6 +274,26 @@ def make_sky():
 
 
 # ============================================================================ kit urbano
+def make_frontage_bays():
+    """Modulos de 3 m. El frente da a +Y y el origen coincide con el suelo del piso."""
+    shop = Builder("SM_ShopBay")
+    # Jambas profundas, zocalo de obra y un tapacanto oscuro bajo la marquesina.
+    for x in (-1.435, 1.435):
+        shop.box((x, 0.085, 1.28), (0.13, 0.17, 2.50), "PlasterBeige", bevel=0.014)
+        shop.box((x, 0.100, 0.24), (0.15, 0.20, 0.48), "PlasterGray", bevel=0.014)
+    shop.box((0, 0.11, 2.49), (2.99, 0.22, 0.115), "MetalGray", bevel=0.012)
+    shop.box((0, 0.15, 3.015), (2.99, 0.30, 0.095), "PlasterGray", bevel=0.018)
+    static(shop)
+
+    window = Builder("SM_WindowBay")
+    # Coincide con la abertura de 36 px en la textura de fachada de 64 px.
+    for x in (-0.855, 0.855):
+        window.box((x, 0.044, 1.55), (0.056, 0.088, 1.42), "MetalGray")
+    window.box((0, 0.055, 2.255), (1.76, 0.11, 0.075), "MetalGray")
+    window.box((0, 0.095, 0.83), (1.91, 0.19, 0.10), "PlasterGray", bevel=0.015)
+    static(window)
+
+
 def make_bollard():
     b = Builder("SM_Bollard", density=4)
     b.cyl((0, 0, 0), (0, 0, 0.72), 0.075, "Concrete", sides=8)
@@ -520,6 +540,41 @@ for s in ("l", "r"):
     ]
 
 
+def make_gripping_hand(b, side, sign):
+    """Una sola carcasa desde la muneca hasta los nudillos, plegada sobre el manillar."""
+    grip = P["grip_" + side]
+    group = "hand_" + side
+    # x, ancho medio, cota inferior y superior, desplazamiento hacia el menique.
+    sections = [(-0.095, 0.033, -0.064, 0.003, 0.017),
+                (-0.069, 0.048, -0.049, 0.032, 0.012),
+                (-0.025, 0.064, -0.024, 0.060, 0.004),
+                (0.011, 0.065, -0.021, 0.061, 0.0),
+                (0.040, 0.052, -0.044, 0.031, -0.003),
+                (0.030, 0.043, -0.055, -0.023, -0.003)]
+    # El dorso ancho se afina hacia los dedos. El lado del menique queda mas bajo.
+    outline = [(-0.75, 0.0), (0.65, 0.0), (1.0, 0.24), (0.92, 0.69),
+               (0.48, 0.90), (-0.30, 1.0), (-0.87, 0.84), (-1.0, 0.39)]
+    rings = []
+    for x, width, low, high, offset in sections:
+        ring = []
+        for across, height in outline:
+            pos = grip + Vector((x, sign * (offset + across * width), low + (high - low) * height))
+            ring.append(b.bm.verts.new(pos))
+        rings.append(ring)
+    faces = [b.bm.faces.new(rings[0][::-1]), b.bm.faces.new(rings[-1])]
+    for previous, current in zip(rings, rings[1:]):
+        for i in range(len(outline)):
+            j = (i + 1) % len(outline)
+            faces.append(b.bm.faces.new((previous[i], previous[j], current[j], current[i])))
+    bmesh.ops.recalc_face_normals(b.bm, faces=faces)
+    b._finish([v for ring in rings for v in ring], "Skin", group, density=2)
+    base = grip + Vector((-0.049, -sign * 0.042, 0.021))
+    joint = grip + Vector((-0.020, -sign * 0.068, 0.006))
+    tip = grip + Vector((0.013, -sign * 0.058, -0.024))
+    b.cyl(base, joint, 0.026, "Skin", group, r1=0.023, sides=6, density=2)
+    b.cyl(joint, tip, 0.023, "Skin", group, r1=0.016, sides=6, density=2)
+
+
 def make_rider():
     b = Builder("SK_PogoRider", density=6.0)
     # ---- pogo
@@ -538,22 +593,13 @@ def make_rider():
     for y in (-0.11, 0.11):
         b.box((0.0, y, 0.355), (0.10, 0.12, 0.022), "Rubber", "frame")
     b.cyl((0, -0.30, 1.38), (0, 0.30, 1.38), 0.02, "PogoRed", "frame", sides=8)
-    b.box((0, 0, 1.38), (0.07, 0.07, 0.07), "PogoRed", "frame", bevel=0.01)
+    b.cyl((0, -0.035, 1.38), (0, 0.035, 1.38), 0.028, "PogoRed", "frame", sides=8)
     for y in (-1, 1):
         b.cyl((0, y * 0.165, 1.38), (0, y * 0.305, 1.38), 0.029, "Grip", "frame", sides=8)
         b.cyl((0, y * 0.305, 1.38), (0, y * 0.315, 1.38), 0.034, "Grip", "frame", sides=8)
     # ---- manos facetadas (mitones envolviendo el puno)
     for s, sg in (("l", 1), ("r", -1)):
-        g = P["grip_" + s]
-        hb = "hand_" + s
-        b.box(g + Vector((-0.045, 0, 0.035)), (0.10, 0.125, 0.085), "Skin", hb, bevel=0.012)  # dorso
-        for i in range(4):
-            fy = g.y + sg * (-0.045 + i * 0.03)
-            b.box((g.x + 0.03, fy, g.z + 0.015), (0.06, 0.027, 0.07), "Skin", hb, bevel=0.006)
-            b.box((g.x + 0.035, fy, g.z - 0.03), (0.045, 0.026, 0.035), "Skin", hb)  # punta de dedos bajo el puno
-        b.box((g.x - 0.0, g.y - sg * 0.075, g.z + 0.0), (0.07, 0.035, 0.05), "Skin", hb, bevel=0.006)  # pulgar
-        w = P["wrist_" + s]
-        b.box(w + Vector((0.0, 0, 0.0)), (0.07, 0.085, 0.075), "Skin", hb, bevel=0.01)
+        make_gripping_hand(b, s, sg)
         # antebrazo y brazo
         b.cyl(P["wrist_" + s], P["elbow_" + s], 0.038, "Skin", "lowerarm_" + s, r1=0.05, sides=6)
         mid = P["elbow_" + s].lerp(P["shoulder_" + s], 0.45)
@@ -840,6 +886,7 @@ def main():
     make_bollard(); make_curb(); make_awning(); make_awning_folded(); make_railing(); make_pole()
     make_vending(); make_ac(); make_crate(); make_planter(); make_lantern(); make_sign_vertical()
     make_road_sign(); make_water_tank(); make_vent()
+    make_frontage_bays()
     make_ring("SM_Ring", "Ring"); make_ring("SM_RingBroken", "RingBroken")
     make_car()
     arm, rider = make_rider()

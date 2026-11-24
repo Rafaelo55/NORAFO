@@ -106,8 +106,8 @@ def t_paving():
         for col in range(-1, w // bw + 1):
             x = col * bw + off
             r = RNG.random()
-            base = (150, 82, 70) if r < 0.55 else ((128, 118, 112) if r < 0.85 else (170, 120, 96))
-            base = shade(base, 0.85 + RNG.random() * 0.25)
+            base = (133, 88, 78) if r < 0.55 else ((124, 91, 82) if r < 0.85 else (144, 100, 84))
+            base = shade(base, 0.95 + RNG.random() * 0.10)
             rect(a, x + 1, row * bh + 1, x + bw, row * bh + bh, base, jitter=7)
             rect(a, x + 1, row * bh + 1, x + bw, row * bh + 2, shade(base, 1.12))
     finalize(noise(a, 4), "T_Paving")
@@ -326,9 +326,9 @@ def t_grip():
 
 def t_skin():
     w = h = 32
-    a = canvas(w, h, (214, 138, 92))
-    a += smooth_noise(w, h, 4, 14)
-    finalize(noise(a, 4), "T_Skin")
+    a = canvas(w, h, (200, 135, 95))
+    a += smooth_noise(w, h, 4, 7)
+    finalize(noise(a, 2), "T_Skin")
 
 
 def t_denim():

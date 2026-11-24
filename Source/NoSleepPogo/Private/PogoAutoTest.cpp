@@ -478,6 +478,25 @@ void APogoAutoTest::TickShots(float Dt)
 		Add(0.4f, [this]() { Shot(TEXT("fp_lookdown")); });
 		Add(0.3f, [this]() { if (APogoCharacter* Q = Pogo()) { Q->SetChargeHeld(false); if (AController* Ctl = Q->GetController()) { Ctl->SetControlRotation(FRotator(-10.f, 0.f, 0.f)); } } });
 		Add(0.35f, [this]() { Shot(TEXT("fp_air")); });
+		// tomas de entrega en el ultimo punto de reaparicion (pavimento frente a los locales)
+		Add(0.6f, [this]()
+		{
+			APogoGameMode* GameMode = GM();
+			APogoCharacter* Q = Pogo();
+			if (GameMode && Q && GameMode->GetCircuit() && GameMode->GetCircuit()->Checkpoints.Num() > 0)
+			{
+				Q->SetChargeHeld(false);
+				Q->SetMoveInput(FVector2D::ZeroVector);
+				Q->ResetToSpawn(GameMode->GetCircuit()->Checkpoints.Last().Spawn);
+				if (AController* Ctl = Q->GetController())
+				{
+					Ctl->SetControlRotation(FRotator(-48.f, 0.f, 0.f));
+				}
+			}
+		});
+		Add(1.4f, [this]() { Shot(TEXT("fp_paving_down")); });
+		Add(0.3f, [this]() { if (APogoCharacter* Q = Pogo()) { if (AController* Ctl = Q->GetController()) { Ctl->SetControlRotation(FRotator(4.f, -38.f, 0.f)); } } });
+		Add(0.8f, [this]() { Shot(TEXT("fp_facades")); });
 		const TArray<FTransform> Views = G->GetCircuit()->ShotViews;
 		for (int32 V = 0; V < Views.Num(); ++V)
 		{
