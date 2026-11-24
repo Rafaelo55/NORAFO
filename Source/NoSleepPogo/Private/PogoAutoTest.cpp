@@ -97,6 +97,32 @@ void APogoAutoTest::Tick(float Dt)
 			Quit(1.5f);
 		}
 	}
+	else if (Mode == TEXT("flow"))
+	{
+		// flujo real del menu: elegir el circuito 1 como un clic y verificar que carga
+		APogoGameMode* G = GM();
+		if (G && Step == 0 && Clock > 3.f)
+		{
+			Step = 1;
+			if (G->IsMenuMode())
+			{
+				Shot(TEXT("flow_menu"));
+				FTimerHandle H;
+				GetWorldTimerManager().SetTimer(H, FTimerDelegate::CreateWeakLambda(this, [this]()
+				{
+					if (APogoPlayerController* C = PC())
+					{
+						C->PlayCircuit(0);
+					}
+				}), 0.5f, false);
+			}
+			else
+			{
+				Shot(TEXT("flow_circuit"));
+				Quit(1.5f);
+			}
+		}
+	}
 	else if (Mode == TEXT("mech"))
 	{
 		TickMech(Dt);

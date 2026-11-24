@@ -347,7 +347,7 @@ void APogoPlayerController::PlayCircuit(int32 Index)
 		GI->LastCircuit = Index;
 	}
 	UGameplayStatics::SetGamePaused(this, false);
-	UGameplayStatics::OpenLevel(this, FName(TEXT("L_City")), true, FString::Printf(TEXT("Circuit=%d"), Index));
+	UGameplayStatics::OpenLevel(this, FName(TEXT("/Game/Maps/L_City")), true, FString::Printf(TEXT("Circuit=%d"), Index));
 }
 
 void APogoPlayerController::RestartCircuit()
@@ -361,7 +361,7 @@ void APogoPlayerController::RestartCircuit()
 void APogoPlayerController::GoToMenu()
 {
 	UGameplayStatics::SetGamePaused(this, false);
-	UGameplayStatics::OpenLevel(this, FName(TEXT("L_City")), true, TEXT(""));
+	UGameplayStatics::OpenLevel(this, FName(TEXT("/Game/Maps/L_City")), true, TEXT(""));
 }
 
 void APogoPlayerController::QuitGame()
